@@ -12,6 +12,7 @@
 #include <sstream>
 #include <arpa/inet.h>
 #include <openssl/md5.h>
+#include <math.h>
 
 #define BUFSIZE 1024
 
@@ -70,6 +71,7 @@ int getEverythingForTask(string text, double *number1, string *op, double *numbe
     int tmpINT2;
     size_t stringLength1;
     size_t stringLength2;
+    double intpart1, intpart2, fractpart1, fractpart2;
 
     int foundCut = text.find(" ");
     if(foundCut > -1){
@@ -81,8 +83,16 @@ int getEverythingForTask(string text, double *number1, string *op, double *numbe
     if(found1 > -1 && found2 > -1){
 
         *number1 = stod(tmp.substr(0, found1));
+        fractpart1 = modf (*number1 , &intpart1);
+        if(fractpart1 != 0.0){
+          return -1;
+        }
         *op = tmp.substr(found1+1, found2-found1-1);
         *number2 = stod(tmp.substr(found2+1));
+        fractpart2 = modf (*number2 , &intpart2);
+        if(fractpart2 != 0.0){
+          return -1;
+        }
         return 0;
     }else{
         return -1;
@@ -231,7 +241,7 @@ int main(int argc, char *argv[])
     }
 
     message = sayHello(&text, loginS);
-    cout << "-> " + message;
+    //cout << "-> " + message;
 
     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
     {
@@ -250,7 +260,7 @@ int main(int argc, char *argv[])
         decide = typeDecide(text, type);
 
         if(decide == "SOLVE"){
-            cout << "<- " + text;
+            //cout << "<- " + text;
             task = getEverythingForTask(text, &number1, &op, &number2);
             if(task == 0){
                 resultErr = calculate(number1, op, number2, &result);
@@ -258,7 +268,7 @@ int main(int argc, char *argv[])
                     resultSTR = to_string(result);
                     resultSTR = cut(resultSTR);
                     message = sayResult(resultSTR, &message);
-                    cout << "-> " + message;
+                    //cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
@@ -266,7 +276,7 @@ int main(int argc, char *argv[])
                     }
                 }else{
                     message = sayErrResult(&message);
-                    cout << "-> " + message;
+                    //cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
@@ -275,7 +285,7 @@ int main(int argc, char *argv[])
                 }
             }else{
                 message = sayErrResult(&message);
-                cout << "-> " + message;
+                //cout << "-> " + message;
                 if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                 {
                     cerr << "Unknown error.\n" << endl;
@@ -284,9 +294,7 @@ int main(int argc, char *argv[])
             }
         }else if(decide == "BYE"){
             secret = getSecret(text);
-            if(secret != "UNKNOWN"){
-                cout << "<- BYE " + secret;
-            }
+                cout << secret;
         }
     }while(decide != "BYE");
 
