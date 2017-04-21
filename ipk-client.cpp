@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <openssl/md5.h>
 #include <math.h>
+#include <stdexcept>
 
 #define BUFSIZE 1024
 
@@ -72,7 +73,15 @@ int getEverythingForTask(string text, double *number1, string *op, double *numbe
     size_t stringLength1;
     size_t stringLength2;
     double intpart1, intpart2, fractpart1, fractpart2;
+    string check1, check2;
 
+    //std::cout << "1 " + text << '\n';
+    int foundEDNL = text.find("\n");
+    if(foundEDNL > -1){
+      text = text.substr(0, foundEDNL);
+    }
+
+    //std::cout <<  text << '\n';
     int foundCut = text.find(" ");
     if(foundCut > -1){
         tmp = text.substr(foundCut+1);
@@ -82,13 +91,22 @@ int getEverythingForTask(string text, double *number1, string *op, double *numbe
     int found2 = tmp.find_last_of(" ");
     if(found1 > -1 && found2 > -1){
 
+      try{
         *number1 = stod(tmp.substr(0, found1));
+      }catch(const std::invalid_argument& ia){
+        return -2;
+      }
         fractpart1 = modf (*number1 , &intpart1);
         if(fractpart1 != 0.0){
           return -1;
         }
         *op = tmp.substr(found1+1, found2-found1-1);
+
+        try{
         *number2 = stod(tmp.substr(found2+1));
+      }catch(const std::invalid_argument& ia){
+        return -2;
+      }
         fractpart2 = modf (*number2 , &intpart2);
         if(fractpart2 != 0.0){
           return -1;
@@ -242,7 +260,6 @@ int main(int argc, char *argv[])
 
     message = sayHello(&text, loginS);
     //cout << "-> " + message;
-
     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
     {
         cerr << "Unknown error.\n" << endl;
@@ -268,7 +285,7 @@ int main(int argc, char *argv[])
                     resultSTR = to_string(result);
                     resultSTR = cut(resultSTR);
                     message = sayResult(resultSTR, &message);
-                    //cout << "-> " + message;
+                    cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
@@ -276,16 +293,16 @@ int main(int argc, char *argv[])
                     }
                 }else{
                     message = sayErrResult(&message);
-                    //cout << "-> " + message;
+                    cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
                         return -1;
                     }
                 }
-            }else{
+            }else if(task == -1){
                 message = sayErrResult(&message);
-                //cout << "-> " + message;
+                cout << "-> " + message;
                 if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                 {
                     cerr << "Unknown error.\n" << endl;
