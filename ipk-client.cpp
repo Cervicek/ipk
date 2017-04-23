@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
                     resultSTR = to_string(result);
                     resultSTR = cut(resultSTR);
                     message = sayResult(resultSTR, &message);
-                    cout << "-> " + message;
+                    //cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
                     }
                 }else{
                     message = sayErrResult(&message);
-                    cout << "-> " + message;
+                    //cout << "-> " + message;
                     if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                     {
                         cerr << "Unknown error.\n" << endl;
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
                 }
             }else if(task == -1){
                 message = sayErrResult(&message);
-                cout << "-> " + message;
+                //cout << "-> " + message;
                 if ((size = send(mySocket, message.c_str(), message.size(), 0)) == -1)
                 {
                     cerr << "Unknown error.\n" << endl;
